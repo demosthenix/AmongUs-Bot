@@ -2,8 +2,7 @@ import discord
 from discord.ext import commands
 from discord import VoiceState, ChannelType, ShardInfo, Member
 
-TOKEN='XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-
+TOKEN='XXXXXXXXXXXXXXXXXXXXXXXXXX'
 client = commands.Bot(command_prefix="-")
 set_vc = None
 
@@ -24,36 +23,85 @@ async def set(ctx, chnl):
 			if c.name.lower() == chnl.lower():
 				set_vc = c
 				flag = 0
-				embedVar = discord.Embed(title="Success!!", description="Channell set on control", color=0x00ff00)
+				embedVar = discord.Embed(title="Success!!", description="Channel set on control", color=0x00ff00)
 	if flag:
-		embedVar = discord.Embed(title="Error!!!", description="No such Voice Channel", color=0x00ff00)
-		await ctx.send(embed=embedVar)
+		embedVar = discord.Embed(title="Error!!!", description="No such Voice Channel", color=0xff0000)
+	await ctx.send(embed=embedVar)
 
+@client.command()
+async def join(ctx):
+	global set_vc
+	try:
+		channel = ctx.author.voice.channel
+		set_vc = channel
+		embedVar = discord.Embed(title="Success!!", description="Channel set on control", color=0x00ff00)
+	except:
+		embedVar = discord.Embed(title="Error!!!", description="Join where? You should join a voice channel first!", color=0xff0000)
+	await ctx.send(embed=embedVar)
+	await channel.connect()
+@client.command()
+async def leave(ctx):
+	global set_vc
+	try:
+		await ctx.voice_client.disconnect()
+		embedVar = discord.Embed(title="Success!!", description="SuMango left the voice channel", color=0x00ffff)
+	except:
+		embedVar = discord.Embed(title="Error!!!", description="Leave What? Your life? like your Ex?", color=0xff0000)
+	await ctx.send(embed=embedVar)
+		
+@client.command()
+async def lv(ctx):
+	await leave(ctx)
 @client.command()
 async def unset(ctx):
 	global set_vc
-	set_vc = None
+	if set_vc != None:
+		embedVar = discord.Embed(title="Success!!", description="No more control over the voice channel", color=0x00ff00)
+		set_vc = None
+	else:
+		embedVar = discord.Embed(title="Error!!!", description="No control was set previously", color=0x00ff00)
+	await ctx.send(embed=embedVar)
 @client.command()
 async def us(ctx):
 	global set_vc
 	set_vc = None
 
 @client.command()
-async def mute(ctx):
-	global set_vc
-	for member in set_vc.members:
-		await member.edit(mute = True)
+async def mute(ctx, arg=None):
+    global set_vc
+    if arg == None:
+        for member in set_vc.members:
+            await member.edit(mute = True)
+    else:
+        mentions = ctx.message.mentions
+        for member in set_vc.members:
+            if member in mentions:
+                await member.edit(mute = True)
+
+                
 @client.command()
-async def m(ctx):
-	await mute(ctx)
-@client.command()
-async def unmute(ctx):
+async def fum(ctx):
 	global set_vc
 	for member in set_vc.members:
 		await member.edit(mute = False)
+	
 @client.command()
-async def um(ctx):
-	await unmute(ctx)
+async def m(ctx, arg=None):
+	await mute(ctx,arg)
+@client.command()
+async def unmute(ctx, arg=None):
+    global set_vc
+    if arg == None:
+        for member in set_vc.members:
+            await member.edit(mute = False)
+    else:
+        mentions = ctx.message.mentions
+        for member in set_vc.members:
+            if member in mentions:
+                await member.edit(mute = False)
+@client.command()
+async def um(ctx, arg=None):
+	await unmute(ctx,arg)
 @client.command()
 async def deaf(ctx):
 	vc = ctx.author.voice.channel
